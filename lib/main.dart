@@ -25,8 +25,8 @@ class MyHomePage extends StatelessWidget {
         title: const Text('Despesas Pessoais'),
         centerTitle: true,
       ),
-      body: Column(
-        children: const <Widget>[
+      body: const Column(
+        children: <Widget>[
           SizedBox(
             width: double.infinity,
             child: Card(
