@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
 import 'package:flutter/material.dart';
 import 'models/transaction.dart';
@@ -14,8 +15,33 @@ class ExpensesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyHomePage(),
+    return MaterialApp(
+      home: const MyHomePage(),
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        scaffoldBackgroundColor: Colors.white,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          foregroundColor: Colors.white,
+        ),
+        // colorScheme: ColorScheme.fromSwatch().copyWith(
+        //   primary: Colors.purple,
+        // ),
+        fontFamily: 'Quicksand',
+        textTheme: ThemeData.light().textTheme.copyWith(
+              titleMedium: const TextStyle(
+                fontFamily: 'OpenSans',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+            fontFamily: 'OpenSans',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -29,19 +55,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [
-    Transaction(
-      id: 't1',
-      title: 'Novo Tênis de Corrida',
-      value: 310.76,
-      date: DateTime.now()
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Conta de Luz',
-      value: 210.30,
-      date: DateTime.now()
-    ),
+    // Transaction(
+    //     id: 't0',
+    //     title: 'Conta Antiga',
+    //     value: 400.00,
+    //     date: DateTime.now().subtract(const Duration(days: 33))),
+    // Transaction(
+    //     id: 't1',
+    //     title: 'Novo Tênis de Corrida',
+    //     value: 310.76,
+    //     date: DateTime.now().subtract(const Duration(days: 3))),
+    // Transaction(
+    //     id: 't2',
+    //     title: 'Conta de Luz',
+    //     value: 210.30,
+    //     date: DateTime.now().subtract(const Duration(days: 4))),
+    // Transaction(
+    //     id: 't3',
+    //     title: 'Cartão de Crédito',
+    //     value: 100311.30,
+    //     date: DateTime.now()),
+    // Transaction(
+    //     id: 't4',
+    //     title: 'Conta de Luz',
+    //     value: 11.30,
+    //     date: DateTime.now()),
   ];
+
+  List<Transaction> get _recentTransactions {
+    return _transactions.where((tr) {
+      return tr.date.isAfter(DateTime.now().subtract(
+        const Duration(days: 7),
+      ));
+    }).toList();
+  }
 
   _openTransactionFormModal(BuildContext context) {
     showModalBottomSheet(
@@ -51,12 +98,12 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  _addTransaction(String title, double value) {
+  _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
-      date: DateTime.now(),
+      date: date,
     );
 
     setState(() {
@@ -66,19 +113,21 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).pop();
   }
 
+  _removeTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((tr) => tr.id == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Despesas Pessoais',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
             onPressed: () => _openTransactionFormModal(context),
@@ -91,24 +140,18 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const SizedBox(
-              child: Card(
-                color: Colors.blue,
-                elevation: 5,
-                child: Text('Grafico'),
-              ),
-            ),
-            TransactionList(_transactions),
+            Chart(_recentTransactions),
+            TransactionList(_transactions, _removeTransaction),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         onPressed: () => _openTransactionFormModal(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
