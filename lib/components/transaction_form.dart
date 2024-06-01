@@ -17,8 +17,7 @@ class _TransactionFormState extends State<TransactionForm> {
 
   _submirForm() {
     final title = _titleController.text;
-    final value =
-        double.tryParse(_valueController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
+    final value = double.tryParse(_valueController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
 
     if (title.isEmpty || value <= 0 || _selectedDate == null) {
       return;
@@ -84,70 +83,79 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              onSubmitted: (_) => _submirForm(),
-              decoration: const InputDecoration(labelText: 'Título'),
-            ),
-            TextField(
-                controller: _valueController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
+          currentFocus.focusedChild!.unfocus();
+        }
+      },
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              TextField(
+                controller: _titleController,
                 onSubmitted: (_) => _submirForm(),
-                decoration: const InputDecoration(labelText: 'Valor (R\$)')),
-            SizedBox(
-              height: 70,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _selectedDate == null
-                          ? 'Nenhum data selecionada!'
-                          : 'Data Selecionada:  ${DateFormat('dd/MM/y').format(_selectedDate!)}',
+                decoration: const InputDecoration(labelText: 'Título'),
+              ),
+              TextField(
+                  controller: _valueController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  onSubmitted: (_) => _submirForm(),
+                  decoration: const InputDecoration(labelText: 'Valor (R\$)')),
+              SizedBox(
+                height: 70,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectedDate == null
+                            ? 'Nenhum data selecionada!'
+                            : 'Data Selecionada:  ${DateFormat('dd/MM/y').format(_selectedDate!)}',
+                      ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: _showDatePicker,
-                    child: Text(
-                      'Selecionar Data',
+                    TextButton(
+                      onPressed: _showDatePicker,
+                      child: Text(
+                        'Selecionar Data',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      // side: BorderSide(
+                      //     color: Colors.black,
+                      //     width: 2), // Cor e largura da borda
+                    ),
+                    onPressed: _submirForm,
+                    child: const Text(
+                      'Salvar',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        // color: Theme.of(context).textTheme.bodyMedium?.color,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    // side: BorderSide(
-                    //     color: Colors.black,
-                    //     width: 2), // Cor e largura da borda
-                  ),
-                  onPressed: _submirForm,
-                  child: const Text(
-                    'Salvar',
-                    style: TextStyle(
-                      // color: Theme.of(context).textTheme.bodyMedium?.color,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
