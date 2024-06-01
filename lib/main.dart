@@ -2,12 +2,21 @@ import 'dart:math';
 
 import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'models/transaction.dart';
 import 'components/transaction_list.dart';
 
+
 void main() {
-  runApp(const ExpensesApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const ExpensesApp());
+  });
 }
 
 class ExpensesApp extends StatelessWidget {
@@ -16,15 +25,29 @@ class ExpensesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: const MyHomePage(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('en', ''), // English
+        const Locale('pt', 'BR'), // Portuguese (Brazil)
+      ],
+      locale: const Locale('pt', 'BR'), // Define o padrão inicial
       theme: ThemeData(
         primarySwatch: Colors.purple,
+        // primaryColorDark: Colors.pink,
+        // primaryColorLight: Colors.pink,
         scaffoldBackgroundColor: Colors.white,
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
         // colorScheme: ColorScheme.fromSwatch().copyWith(
-        //   primary: Colors.purple,
+          // primary: Colors.purple.shade800,
+          // secondary: Colors.pink,
         // ),
         fontFamily: 'Quicksand',
         textTheme: ThemeData.light().textTheme.copyWith(
@@ -55,31 +78,31 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [
-    // Transaction(
-    //     id: 't0',
-    //     title: 'Conta Antiga',
-    //     value: 400.00,
-    //     date: DateTime.now().subtract(const Duration(days: 33))),
-    // Transaction(
-    //     id: 't1',
-    //     title: 'Novo Tênis de Corrida',
-    //     value: 310.76,
-    //     date: DateTime.now().subtract(const Duration(days: 3))),
-    // Transaction(
-    //     id: 't2',
-    //     title: 'Conta de Luz',
-    //     value: 210.30,
-    //     date: DateTime.now().subtract(const Duration(days: 4))),
-    // Transaction(
-    //     id: 't3',
-    //     title: 'Cartão de Crédito',
-    //     value: 100311.30,
-    //     date: DateTime.now()),
-    // Transaction(
-    //     id: 't4',
-    //     title: 'Conta de Luz',
-    //     value: 11.30,
-    //     date: DateTime.now()),
+    Transaction(
+        id: 't0',
+        title: 'Conta Antiga',
+        value: 400.00,
+        date: DateTime.now().subtract(const Duration(days: 33))),
+    Transaction(
+        id: 't1',
+        title: 'Novo Tênis de Corrida',
+        value: 310.76,
+        date: DateTime.now().subtract(const Duration(days: 3))),
+    Transaction(
+        id: 't2',
+        title: 'Conta de Luz',
+        value: 210.30,
+        date: DateTime.now().subtract(const Duration(days: 4))),
+    Transaction(
+        id: 't3',
+        title: 'Cartão de Crédito',
+        value: 100311.30,
+        date: DateTime.now()),
+    Transaction(
+        id: 't4',
+        title: 'Conta de Luz',
+        value: 11.30,
+        date: DateTime.now()),
   ];
 
   List<Transaction> get _recentTransactions {

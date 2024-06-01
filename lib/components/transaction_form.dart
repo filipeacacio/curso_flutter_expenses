@@ -18,7 +18,7 @@ class _TransactionFormState extends State<TransactionForm> {
   _submirForm() {
     final title = _titleController.text;
     final value =
-        double.tryParse(_valueController.text.replaceAll(',', '.')) ?? 0.0;
+        double.tryParse(_valueController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
 
     if (title.isEmpty || value <= 0 || _selectedDate == null) {
       return;

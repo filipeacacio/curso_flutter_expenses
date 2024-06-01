@@ -8,6 +8,19 @@ class Chart extends StatelessWidget {
 
   final List<Transaction> recentTransaction;
 
+  String _getBRDay(String day) {
+    Map<String, String> days = {
+      'sun': 'D',
+      'mon': 'S',
+      'tue': 'T',
+      'wed': 'Q',
+      'thu': 'Q',
+      'fri': 'S',
+      'sat': 'S',
+    };
+    return days[day.toLowerCase()] ?? '';
+  }
+
   List<Map<String, Object>> get groupedTransactions {
     return List.generate(7, (index) {
       final weekDay = DateTime.now().subtract(
@@ -27,7 +40,7 @@ class Chart extends StatelessWidget {
       }
 
       return {
-        'day': DateFormat.E().format(weekDay)[0],
+        'day': _getBRDay(DateFormat.E().format(weekDay)),
         'value': totalSum,
       };
     }).reversed.toList();
