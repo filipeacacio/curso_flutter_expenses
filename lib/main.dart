@@ -24,7 +24,7 @@ class ExpensesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
       home: const MyHomePage(),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
@@ -45,8 +45,8 @@ class ExpensesApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
         // colorScheme: ColorScheme.fromSwatch().copyWith(
-          // primary: Colors.purple.shade800,
-          // secondary: Colors.pink,
+        // primary: Colors.purple.shade800,
+        // secondary: Colors.pink,
         // ),
         fontFamily: 'Quicksand',
         textTheme: ThemeData.light().textTheme.copyWith(
@@ -136,9 +136,35 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _removeTransaction(String id) {
-    setState(() {
-      _transactions.removeWhere((tr) => tr.id == id);
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        // title: const Text('Excluir Transação'),
+        content: const Text('Excluir Transação?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _transactions.removeWhere((tr) => tr.id == id);
+              });
+              Navigator.pop(context, 'OK');
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _editTransaction(String id) {
+    print('ID Transaction: $id');
+    // setState(() {
+    //   _transactions.removeWhere((tr) => tr.id == id);
+    // });
   }
 
   @override
@@ -163,7 +189,8 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Chart(_recentTransactions),
-            TransactionList(_transactions, _removeTransaction),
+            TransactionList(
+                _transactions, _removeTransaction, _editTransaction),
           ],
         ),
       ),
