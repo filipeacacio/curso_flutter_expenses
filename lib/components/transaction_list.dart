@@ -1,3 +1,4 @@
+import 'package:expenses/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import 'package:intl/intl.dart';
@@ -65,7 +66,7 @@ class TransactionList extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     subtitle: Text(
-                      DateFormat('dd/MM/y').format(tr.date),
+                      StringUtil.DateTimeFormatBR(tr.date),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
