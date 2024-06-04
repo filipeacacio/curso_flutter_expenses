@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
+import 'package:expenses/utils/string_util.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
@@ -150,11 +151,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _removeTransaction(String id) {
+    Transaction t = _transactions.firstWhere((tr) => tr.id == id);
+    String formattedValue = StringUtil.NumberFormatBR(t.value);
+    String msg = '${t.title}\n${StringUtil.DateTimeFormatBR(t.date)}\nR\$: ${formattedValue}' ;
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        // title: const Text('Excluir Transação'),
-        content: const Text('Excluir Transação?'),
+        title: const Text('Excluir Transação?'),
+        content: Text(msg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'Cancel'),

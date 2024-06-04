@@ -1,6 +1,6 @@
 import 'package:expenses/models/transaction.dart';
+import 'package:expenses/utils/string_util.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
   const TransactionForm(this.onSubmit, {required Transaction this.transaction, super.key});
@@ -14,12 +14,9 @@ class TransactionForm extends StatefulWidget {
 
 class _TransactionFormState extends State<TransactionForm> {
   _TransactionFormState(Transaction transaction) {
-
-    final formatter = NumberFormat('#,##0.00', 'pt_BR');
-
     id = transaction.id;
     _titleController.text = transaction.title;
-    _valueController.text = formatter.format(transaction.value);
+    _valueController.text = StringUtil.NumberFormatBR(transaction.value);
     _selectedDate = transaction.date;
   }
 
@@ -68,13 +65,11 @@ class _TransactionFormState extends State<TransactionForm> {
     }
 
     double numValue = double.parse(value) / 100;
-
-    final formatter = NumberFormat('#,##0.00', 'pt_BR');
-    String formattedValue = formatter.format(numValue);
+    String formattedValue = StringUtil.NumberFormatBR(numValue);
 
     // Atualiza o TextEditingController com o valor formatado
     _valueController.value = TextEditingValue(
-      text: formattedValue,
+      text: StringUtil.NumberFormatBR(numValue),
       selection: TextSelection.collapsed(offset: formattedValue.length),
     );
   }
@@ -83,7 +78,9 @@ class _TransactionFormState extends State<TransactionForm> {
     showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2019),
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 7),
+      ),
       lastDate: DateTime.now(),
     ).then((pickerdDdate) {
       if (pickerdDdate == null) {
@@ -130,7 +127,7 @@ class _TransactionFormState extends State<TransactionForm> {
                       child: Text(
                         _selectedDate == null
                             ? 'Nenhum data selecionada!'
-                            : 'Data Selecionada:  ${DateFormat('dd/MM/y').format(_selectedDate!)}',
+                            : 'Data Selecionada:  ${StringUtil.DateTimeFormatBR(_selectedDate!)}',
                       ),
                     ),
                     TextButton(
