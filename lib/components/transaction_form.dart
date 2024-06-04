@@ -1,21 +1,35 @@
+import 'package:expenses/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
-  const TransactionForm(this.onSubmit, {super.key});
+  const TransactionForm(this.onSubmit, {required Transaction this.transaction, super.key});
 
-  final void Function(String, double, DateTime) onSubmit;
+  final Transaction transaction;
+  final void Function(String, String, double, DateTime) onSubmit;
 
   @override
-  State<TransactionForm> createState() => _TransactionFormState();
+  State<TransactionForm> createState() => _TransactionFormState(transaction);
 }
 
 class _TransactionFormState extends State<TransactionForm> {
+  _TransactionFormState(Transaction transaction) {
+
+    final formatter = NumberFormat('#,##0.00', 'pt_BR');
+
+    id = transaction.id;
+    _titleController.text = transaction.title;
+    _valueController.text = formatter.format(transaction.value);
+    _selectedDate = transaction.date;
+  }
+
+  String id = '';
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
   DateTime? _selectedDate = DateTime.now();
 
   _submirForm() {
+    final id = this.id;
     final title = _titleController.text;
     final value = double.tryParse(_valueController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
 
@@ -23,7 +37,7 @@ class _TransactionFormState extends State<TransactionForm> {
       return;
     }
 
-    widget.onSubmit(title, value, _selectedDate!);
+    widget.onSubmit(id, title, value, _selectedDate!);
   }
 
   @override

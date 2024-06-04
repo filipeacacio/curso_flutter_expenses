@@ -113,23 +113,37 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _openTransactionFormModal(BuildContext context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (_) {
-          return TransactionForm(_addTransaction);
-        });
-  }
-
-  _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
+      title: '',
+      value: 0.0,
+      date: DateTime.now(),
+    );
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return TransactionForm(_addTransaction, transaction: newTransaction);
+      });
+  }
+
+  _addTransaction(String id, String title, double value, DateTime date) {
+    final newTransaction = Transaction(
+      id: id,
       title: title,
       value: value,
       date: date,
     );
 
     setState(() {
-      _transactions.add(newTransaction);
+      if ( _transactions.where((tr) => tr.id == id).isEmpty ) {
+        _transactions.add(newTransaction);
+      } else {
+        Transaction t = _transactions.firstWhere((tr) => tr.id == id);
+        t.id = id;
+        t.title = title;
+        t.value = value;
+        t.date = date;
+      }
     });
 
     Navigator.of(context).pop();
@@ -161,10 +175,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _editTransaction(String id) {
-    print('ID Transaction: $id');
-    // setState(() {
-    //   _transactions.removeWhere((tr) => tr.id == id);
-    // });
+    Transaction t = _transactions.firstWhere((element) => element.id == id);
+
+    // print('ID Transaction: $id');
+    // print('id: ${t.id}, title: ${t.title}, value: ${t.value}, date: ${t.date}');
+
+    final newTransaction = Transaction(
+      id: t.id,
+      title: t.title,
+      value: t.value,
+      date: t.date,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return TransactionForm(_addTransaction, transaction: newTransaction);
+      });
   }
 
   @override
@@ -189,8 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Chart(_recentTransactions),
-            TransactionList(
-                _transactions, _removeTransaction, _editTransaction),
+            TransactionList(_transactions, _removeTransaction, _editTransaction),
           ],
         ),
       ),
