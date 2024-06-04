@@ -79,7 +79,7 @@ class _TransactionFormState extends State<TransactionForm> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now().subtract(
-        const Duration(days: 7),
+        const Duration(days: 6),
       ),
       lastDate: DateTime.now(),
     ).then((pickerdDdate) {
