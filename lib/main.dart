@@ -1,22 +1,24 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
 import 'package:expenses/utils/string_util.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'models/transaction.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'components/transaction_list.dart';
+import 'models/transaction.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]).then((_) {
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]).then((_) {
     runApp(const ExpensesApp());
-  });
+//   });
 }
 
 class ExpensesApp extends StatelessWidget {
@@ -51,16 +53,16 @@ class ExpensesApp extends StatelessWidget {
         // ),
         fontFamily: 'Quicksand',
         textTheme: ThemeData.light().textTheme.copyWith(
-              titleMedium: const TextStyle(
+              titleMedium: TextStyle(
                 fontFamily: 'OpenSans',
-                fontSize: 16,
+                fontSize: 16 * MediaQuery.textScalerOf(context).scale(1),
                 fontWeight: FontWeight.bold,
               ),
             ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           titleTextStyle: TextStyle(
             fontFamily: 'OpenSans',
-            fontSize: 20,
+            fontSize: 20 * MediaQuery.textScalerOf(context).scale(1),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -104,6 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //     value: 11.30,
     //     date: DateTime.now()),
   ];
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -198,41 +201,111 @@ class _MyHomePageState extends State<MyHomePage> {
       });
   }
 
+  Widget _getIconButton(IconData icon, Function() fn) {
+    return Platform.isIOS
+    ? GestureDetector(onTap: fn, child: Icon(icon))
+    : IconButton(icon: Icon(icon), onPressed: fn, color: Colors.white,);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    final iconList = Platform.isIOS ? CupertinoIcons.list_bullet: Icons.list;
+    final iconChart = Platform.isIOS ? CupertinoIcons.chart_bar_square: Icons.show_chart;
+
+    final actions = [
+      if ( isLandscape )
+      _getIconButton(
+        _showChart ? iconList : iconChart,
+        () {
+          setState(() {
+            _showChart = !_showChart;
+          });
+        },
+      ),
+      _getIconButton(
+        Platform.isIOS ? CupertinoIcons.add : Icons.add,
+        () => _openTransactionFormModal(context)
+      ),
+    ];
+
+
+    final appBar = AppBar(
         title: const Text(
           'Despesas Pessoais',
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        actions: [
-          IconButton(
-            onPressed: () => _openTransactionFormModal(context),
-            icon: const Icon(Icons.add),
-            color: Colors.white,
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
+        actions: actions,
+      );
+
+    final availableHeight = mediaQuery.size.height
+          - appBar.preferredSize.height
+          - mediaQuery.padding.top;
+
+    final boryPage = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_transactions, _removeTransaction, _editTransaction),
+            // if (isLandscape)
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //      Text('Exibir Gráfico'),
+            //      Switch.adaptive(
+            //       activeColor: Theme.of(context).colorScheme.primary, //Theme.of(context).colorScheme.secondary,
+            //       value: _showChart,
+            //       onChanged: (value) {
+            //         setState(() {
+            //           _showChart = !_showChart;
+            //         });
+            //      },
+            //      ),
+            //   ],
+            // ),
+            if (_showChart || !isLandscape)
+              SizedBox(
+                height: availableHeight * (isLandscape ? 0.76 : 0.25),
+                child: Chart(_recentTransactions),
+              ),
+            if (!_showChart || !isLandscape)
+              SizedBox(
+                height: availableHeight * (isLandscape ? 1 : 0.75),
+                child: TransactionList(_transactions, _removeTransaction, _editTransaction)
+              ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        onPressed: () => _openTransactionFormModal(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
+    );
+
+    return Platform.isIOS
+    ? CupertinoPageScaffold(
+      child: boryPage,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Despesas Pessoais'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: actions,
         ),
-        child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    )
+    : Scaffold(
+        appBar: appBar,
+        body: boryPage,
+        floatingActionButton: Platform.isIOS
+        ? SizedBox()
+        : FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onPressed: () => _openTransactionFormModal(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

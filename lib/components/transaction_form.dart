@@ -1,9 +1,13 @@
+import 'package:expenses/components/adaptative_button.dart';
+import 'package:expenses/components/adaptative_text_field.dart';
+import 'package:expenses/components/adaptative_date_picker.dart';
 import 'package:expenses/models/transaction.dart';
 import 'package:expenses/utils/string_util.dart';
 import 'package:flutter/material.dart';
 
 class TransactionForm extends StatefulWidget {
-  const TransactionForm(this.onSubmit, {required Transaction this.transaction, super.key});
+  const TransactionForm(this.onSubmit,
+      {required Transaction this.transaction, super.key});
 
   final Transaction transaction;
   final void Function(String, String, double, DateTime) onSubmit;
@@ -23,18 +27,20 @@ class _TransactionFormState extends State<TransactionForm> {
   String id = '';
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
-  DateTime? _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now();
 
   _submirForm() {
     final id = this.id;
     final title = _titleController.text;
-    final value = double.tryParse(_valueController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
+    final value = double.tryParse(
+            _valueController.text.replaceAll('.', '').replaceAll(',', '.')) ??
+        0.0;
 
-    if (title.isEmpty || value <= 0 || _selectedDate == null) {
+    if (title.isEmpty || value <= 0) {
       return;
     }
 
-    widget.onSubmit(id, title, value, _selectedDate!);
+    widget.onSubmit(id, title, value, _selectedDate);
   }
 
   @override
@@ -74,24 +80,6 @@ class _TransactionFormState extends State<TransactionForm> {
     );
   }
 
-  _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(
-        const Duration(days: 6),
-      ),
-      lastDate: DateTime.now(),
-    ).then((pickerdDdate) {
-      if (pickerdDdate == null) {
-        return;
-      }
-      setState(() {
-        _selectedDate = pickerdDdate;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -102,70 +90,56 @@ class _TransactionFormState extends State<TransactionForm> {
           currentFocus.focusedChild!.unfocus();
         }
       },
-      child: Card(
-        elevation: 5,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: _titleController,
-                onSubmitted: (_) => _submirForm(),
-                decoration: const InputDecoration(labelText: 'Título'),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 15,
+          bottom: 10,
+        ),
+        child: SingleChildScrollView(
+          child: Card(
+            elevation: 5,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 10,
+                right: 10,
+                left: 10,
+                bottom: 10 + MediaQuery.of(context).viewInsets.bottom
               ),
-              TextField(
-                  controller: _valueController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  onSubmitted: (_) => _submirForm(),
-                  decoration: const InputDecoration(labelText: 'Valor (R\$)')),
-              SizedBox(
-                height: 70,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _selectedDate == null
-                            ? 'Nenhum data selecionada!'
-                            : 'Data Selecionada:  ${StringUtil.DateTimeFormatBR(_selectedDate!)}',
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _showDatePicker,
-                      child: Text(
-                        'Selecionar Data',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              child: Column(
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      // side: BorderSide(
-                      //     color: Colors.black,
-                      //     width: 2), // Cor e largura da borda
-                    ),
-                    onPressed: _submirForm,
-                    child: const Text(
-                      'Salvar',
-                      style: TextStyle(
-                        // color: Theme.of(context).textTheme.bodyMedium?.color,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  AdaptativeTextField(
+                    controller: _titleController,
+                    onSubmitted: (_) => _submirForm(),
+                    label: 'Título',
                   ),
+                  AdaptativeTextField(
+                      controller: _valueController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      onSubmitted: (_) => _submirForm(),
+                      label: 'Valor (R\$)'
+                  ),
+                  AdaptativeDatePicker(
+                    selectedDate: _selectedDate,
+                    onDateChanged: (newDate) {
+                      setState(() {
+                        _selectedDate = newDate;
+                      });
+                    },
+                    initialDate: _selectedDate,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      AdaptativeButton(
+                        label: 'Salvar',
+                        onPressed: _submirForm,
+                      ),
+                    ],
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
         ),
       ),
